@@ -2,6 +2,7 @@
 
 import requests
 import time
+import sys
 from bs4 import BeautifulSoup
 from array import array
 
@@ -62,16 +63,17 @@ for category in categories:
 
     for offer in offers:
         title = offer.find('h4', attrs={'class': 'm-offer-tile__title'})
-        quantity = offer.find('div', attrs={'class': 'm-offer-tile__quantity'})
-        old_price = offer.find('div', attrs={'class': 'a-pricetag__old-price'})
-        price = offer.find('div', attrs={'class': 'a-pricetag__price'})
-        # items.append(Item(title, quantity, old_price, price))
-        print("Title: ", title)
-        print("Quantity: ", quantity)
-        print("Price: ", price)
+        # sometimes the subtitle is used as the actual title. this is a hack.
+        if title is None:
+            title = offer.find('h5', attrs={'class': 'm-offer-tile__subtitle'})
+        title = title.string.strip()
+        quantity = offer.find('div', attrs={'class': 'm-offer-tile__quantity'}).string.strip()
+        old_price = offer.find('div', attrs={'class': 'a-pricetag__old-price'}).string.strip()
+        price = offer.find('div', attrs={'class': 'a-pricetag__price'}).text.strip()
+        items.append(Item(title, quantity, old_price, price))
 
     # test that it works
-    # print('[%s]' % ', '.join(map(str, items)))
+    print('[%s]' % ', '.join(map(str, items)))
 
     # don't be rude to website owners
     time.sleep(1)
