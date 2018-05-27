@@ -43,12 +43,37 @@ class Category:
 
 
 # website url
-base_url = 'https://www.konzum.hr/klik/v2/categories'
+base_url = 'https://www.konzum.hr/klik/v2/'
 
 # read data
-page = requests.get(base_url)
+page = requests.get(base_url + 'categories')
 
 # parse
-parsed = json.loads(page.text)
+parsed = page.json()
 
-print(json.dumps(parsed, indent=4, sort_keys=True))
+# remove the first promo page
+del parsed[0]
+
+for category in parsed:
+    category_id = category["id"]
+    name = category["name"]
+    url = category["products_path"]
+    print("ID: \t", category_id)
+    print("Name: \t", name)
+    print("URL: \t", url)
+    print()
+
+    products_page = requests.get(base_url + url)
+    products = products_page.json()
+
+    for product in products["products"]:
+        product_id = product["id"]
+        product_name = product["name"]
+        product_price = product["statistical_price"]
+        # product_weight = product["netto_weight_statement"]
+        print("\tID: \t", product_id)
+        print("\tName: \t", product_name)
+        print("\tPrice: \t", product_price)
+        # print("\tWeight: \t", product_weight)
+
+    time.sleep(1)
