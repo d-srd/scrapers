@@ -16,7 +16,10 @@ content = req.content
 page = BeautifulSoup(content, 'html.parser')
 
 offers = page.find_all('div', attrs={'class': 'm-offer-tile'})
-print(offers)
 
 for offer in offers:
-    print(offer.tag)
+    title = offer.find('h4', attrs={'class': 'm-offer-tile__title'})
+    quantity = offer.find('div', attrs={'class': 'm-offer-tile__quantity'})
+    old_price = offer.find('div', attrs={'class': 'a-pricetag__old-price'})
+    price = offer.find('div', attrs={'class': 'a-pricetag__price'})
+    print(title, quantity, old_price, price)
