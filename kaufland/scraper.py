@@ -16,16 +16,30 @@ class Item:
         self.price = price
 
     def __str__(self):
-        return "Name: " + self.name + \
+        return "\nName: " + self.name + \
             "\nQuantity: " + self.quantity + \
             "\nOld price: " + self.old_price + \
             "\nPrice: " + self.price
 
     def __repr__(self):
-        return __str__(self)
+        return "\nName: " + self.name + \
+            "\nQuantity: " + self.quantity + \
+            "\nOld price: " + self.old_price + \
+            "\nPrice: " + self.price
 
     def get_discount_level(self):
         return self.price / self.old_price
+
+class Category:
+    def __init__(self, url, name):
+        self.url = url
+        self.name = name
+
+    def __str__(self):
+        return "Category named: " + self.name + " , with URL: " + self.url + " "
+
+    def __repr__(self):
+        return "Category named: " + self.name + " , with URL: " + self.url + " "
 
 
 # website url
@@ -41,16 +55,18 @@ soup = BeautifulSoup(content, 'html.parser')
 
 # get categories container, map to list of categories URLs
 categories_outer = soup.find('div', attrs={'id': 'offers-overview-1'})
-categories_elements = categories_outer.find_all('a', href=True)
+categories_elements = categories_outer.find_all('a')
 categories = []
 
 for element in categories_elements:
-    categories.append(element['href'])
-    print("Kategorija: ", element['href'])
+    categories.append(Category(element['href'], element.text.strip()))
+    print("Kategorija: ", element.text.strip())
+
+all_items = {}
 
 # get all items in category
 for category in categories:
-    r = requests.get(base_url + category, headers={'User-Agent': 'Mozilla Firefox'})
+    r = requests.get(base_url + category.url, headers={'User-Agent': 'Mozilla Firefox'})
     c = r.content
     page = BeautifulSoup(c, 'html.parser')
 
@@ -73,7 +89,13 @@ for category in categories:
         items.append(Item(title, quantity, old_price, price))
 
     # test that it works
-    print('[%s]' % ', '.join(map(str, items)))
+    # print('[%s]' % ', '.join(map(str, items)))
+
+    all_items[category] = items
 
     # don't be rude to website owners
     time.sleep(1)
+
+for keys, values in all_items.items():
+    print(keys)
+    print(values)
