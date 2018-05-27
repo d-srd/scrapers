@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
+import time
 from bs4 import BeautifulSoup
 from array import array
 
@@ -15,9 +16,9 @@ class Item:
 
     def __str__(self):
         return "Name: " + self.name + \
-            "Quantity: " + self.quantity + \
-            "Old price: " + self.old_price + \
-            "Price: " + self.price
+            "\nQuantity: " + self.quantity + \
+            "\nOld price: " + self.old_price + \
+            "\nPrice: " + self.price
 
     def __repr__(self):
         return __str__(self)
@@ -25,28 +26,52 @@ class Item:
     def get_discount_level(self):
         return self.price / self.old_price
 
+
 # website url
-fish_page = 'https://www.kaufland.hr/ponuda/ponuda-pregled.category=02_Svježa_riba.html'
+rand_url = 'https://www.kaufland.hr/ponuda/ponuda-pregled.category=02_Svježa_riba.html'
+base_url = 'https://www.kaufland.hr/'
 
 # request
-req = requests.get(fish_page, headers={'User-Agent': 'Mozilla Firefox'})
+req = requests.get(rand_url, headers={'User-Agent': 'Mozilla Firefox'})
 content = req.content
 
 # parsed html
-page = BeautifulSoup(content, 'html.parser')
+soup = BeautifulSoup(content, 'html.parser')
 
-# remove currency tags for easier parsing
-for span in page.find_all('span', attrs={'class': 'a-pricetag__currency'}):
-    span.decompose()
+# get categories container, map to list of categories URLs
+categories_outer = soup.find('div', attrs={'id': 'offers-overview-1'})
+categories_elements = categories_outer.find_all('a', href=True)
+categories = []
 
-offers = page.find_all('div', attrs={'class': 'm-offer-tile'})
-items = []
+for element in categories_elements:
+    categories.append(element['href'])
+    print("Kategorija: ", element['href'])
 
-for offer in offers:
-    title = offer.find('h4', attrs={'class': 'm-offer-tile__title'}).string.strip()
-    quantity = offer.find('div', attrs={'class': 'm-offer-tile__quantity'}).string.strip()
-    old_price = offer.find('div', attrs={'class': 'a-pricetag__old-price'}).string.strip()
-    price = offer.find('div', attrs={'class': 'a-pricetag__price'}).text.strip()
-    items.append(Item(title, quantity, old_price, price))
+# get all items in category
+for category in categories:
+    r = requests.get(base_url + category, headers={'User-Agent': 'Mozilla Firefox'})
+    c = r.content
+    page = BeautifulSoup(c, 'html.parser')
 
-print('[%s]' % ', '.join(map(str, items)))
+    # remove currency tags for easier parsing
+    for span in page.find_all('span', attrs={'class': 'a-pricetag__currency'}):
+        span.decompose()
+
+    offers = page.find_all('div', attrs={'class': 'm-offer-tile'})
+    items = []
+
+    for offer in offers:
+        title = offer.find('h4', attrs={'class': 'm-offer-tile__title'})
+        quantity = offer.find('div', attrs={'class': 'm-offer-tile__quantity'})
+        old_price = offer.find('div', attrs={'class': 'a-pricetag__old-price'})
+        price = offer.find('div', attrs={'class': 'a-pricetag__price'})
+        # items.append(Item(title, quantity, old_price, price))
+        print("Title: ", title)
+        print("Quantity: ", quantity)
+        print("Price: ", price)
+
+    # test that it works
+    # print('[%s]' % ', '.join(map(str, items)))
+
+    # don't be rude to website owners
+    time.sleep(1)
