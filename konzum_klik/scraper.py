@@ -88,7 +88,8 @@ for category in parsed:
         print("\tPrice: \t", product_price)
         # print("\tWeight: \t", product_weight)
         if should_output_file:
-            for line in [product_id, product_name, product_price]:
-                f.write(str(line) + '\n')
+            f.write('Name: \t' + str(product_name) + '\n')
+            f.write('ID: \t' + str(product_id) + '\n')
+            f.write('Price: \t' + str(product_price) + '\n')
 
     time.sleep(1)
