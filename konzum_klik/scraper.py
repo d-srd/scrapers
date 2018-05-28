@@ -2,11 +2,20 @@
 
 import time
 import sys
-import json
 import requests
+import argparse
 from bs4 import BeautifulSoup
 
 # scrape pictures + prices of available items in Konzum
+
+parser = argparse.ArgumentParser(description='Scrape product data from Konzum')
+parser.add_argument("--output-results",
+                    help="output results of scraping to output.txt",
+                    dest='output_exists',
+                    action='store_true'
+                    )
+
+should_output_file = parser.parse_args()
 
 class Item:
     def __init__(self, name, quantity, old_price, price):
@@ -54,6 +63,9 @@ parsed = page.json()
 # remove the first promo page
 del parsed[0]
 
+# output file for products
+f = open('products.txt', 'w')
+
 for category in parsed:
     category_id = category["id"]
     name = category["name"]
@@ -75,5 +87,8 @@ for category in parsed:
         print("\tName: \t", product_name)
         print("\tPrice: \t", product_price)
         # print("\tWeight: \t", product_weight)
+        if should_output_file:
+            for line in [product_id, product_name, product_price]:
+                f.write(str(line) + '\n')
 
     time.sleep(1)
