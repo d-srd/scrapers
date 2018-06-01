@@ -17,11 +17,10 @@ class Category:
     def __repr__(self):
         return "Category named: " + self.name + " , with URL: " + self.url + " "
 
+# website url
+base_url = 'https://www.konzum.hr/klik/v2/'
 
 def get_page():
-    # website url
-    base_url = 'https://www.konzum.hr/klik/v2/'
-
     # read data
     page = requests.get(base_url + 'categories')
     parsed = page.json()
@@ -47,11 +46,13 @@ def get_products():
             product_id = product["id"]
             product_name = product["name"]
             product_price = product["statistical_price"]
-            all_products.append(Item(product_name, None, product_price, product_price))
+            all_products.append(Item(product_name, 1, product_price, product_price))
             # product_weight = product["netto_weight_statement"]
             # print("\tWeight: \t", product_weight)
 
         # don't be rude to website owners
-        time.sleep(1)
+        # time.sleep(1)
 
     return all_products
+
+print('[%s]' % ', '.join(map(str, get_products())))

@@ -9,15 +9,15 @@ class Item:
 
     def __str__(self):
         return "\nName: " + self.name + \
-            "\nQuantity: " + self.quantity + \
-            "\nOld price: " + self.old_price + \
-            "\nPrice: " + self.price
+            "\nQuantity: " + str(self.quantity) + \
+            "\nOld price: " + str(self.old_price) + \
+            "\nPrice: " + str(self.price)
 
     def __repr__(self):
         return "\nName: " + self.name + \
-            "\nQuantity: " + self.quantity + \
-            "\nOld price: " + self.old_price + \
-            "\nPrice: " + self.price
+            "\nQuantity: " + str(self.quantity) + \
+            "\nOld price: " + str(self.old_price) + \
+            "\nPrice: " + str(self.price)
 
     def get_discount_level(self):
         return self.price / self.old_price
