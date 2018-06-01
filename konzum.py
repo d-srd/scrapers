@@ -1,6 +1,9 @@
 import time
 import sys
 import requests
+import re
+import os.path
+import sqlite3
 from bs4 import BeautifulSoup
 from item import Item
 
@@ -45,14 +48,33 @@ def get_products():
         for product in products["products"]:
             product_id = product["id"]
             product_name = product["name"]
-            product_price = product["statistical_price"]
-            all_products.append(Item(product_name, 1, product_price, product_price))
+            product_price = str(product["price"]["amount"])
+            product_price = product_price[:-2] + '.' + product_price[-2:]
+            product_price = float(product_price)
+            all_products.append(Item(product_name, 1, product_price, 0))
             # product_weight = product["netto_weight_statement"]
             # print("\tWeight: \t", product_weight)
 
         # don't be rude to website owners
-        # time.sleep(1)
+        time.sleep(0.5)
 
     return all_products
 
-print('[%s]' % ', '.join(map(str, get_products())))
+def save_to_db(name, items):
+
+    conn = sqlite3.connect(name)
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE IF NOT EXISTS products
+                 (name text, quantity int, price real, discount_factor real)''')
+
+    for item in items:
+        c.execute('''INSERT INTO products VALUES (?, ?, ?, ?)''', (item.name, item.quantity, item.price, item.discount_factor))
+
+    conn.commit()
+
+    conn.close()
+
+products = get_products()
+print('[%s]' % ', '.join(map(str, products)))
+save_to_db('konzum.db', products)
